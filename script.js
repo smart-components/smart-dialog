@@ -48,35 +48,37 @@ window.SmartDialog = (function(win) {
   };
 
   proto.open = function sd_open() {
-    if (this.classList.contains('closed')) {
-      this.fireEvent('will-open');
-      this.classList.remove('closing');
-      this.classList.remove('closed');
-      this.classList.add('opening');
-      // handle the case when transitionend event is not fired
-      this.transitionTimer = setTimeout(function() {
-        this._onOpened();
-        this.transitionTimer = null;
-      }.bind(this), openDuration);
+    if (this.classList.contains('opened') ||
+        this.classList.contains('opening')) {
+      return;
     }
+    this.fireEvent('will-open');
+    this.classList.remove('closing');
+    this.classList.remove('closed');
+    this.classList.add('opening');
+    // handle the case when transitionend event is not fired
+    clearTimeout(this.transitionTimer);
+    this.transitionTimer = setTimeout(function() {
+      this._onOpened();
+      this.transitionTimer = null;
+    }.bind(this), openDuration);
   };
 
   proto.close = function sd_close() {
-    if (this.classList.contains('opened')) {
-      this.fireEvent('will-close');
-      this.classList.remove('opening');
-      this.classList.remove('opened');
-      this.classList.add('prepare-close');
-      // force scale to full-size circle for closing
-      window.getComputedStyle(this).width;
-      this.classList.remove('prepare-close');
-      this.classList.add('closing');
-      // handle the case when transitionend event is not fired
-      this.transitionTimer = setTimeout(function() {
-        this._onClosed();
-        this.transitionTimer = null;
-      }.bind(this), closeDuration);
+    if (this.classList.contains('closed') ||
+        this.classList.contains('closing')) {
+      return;
     }
+    this.fireEvent('will-close');
+    this.classList.remove('opening');
+    this.classList.remove('opened');
+    this.classList.add('closing');
+    // handle the case when transitionend event is not fired
+    clearTimeout(this.transitionTimer);
+    this.transitionTimer = setTimeout(function() {
+      this._onClosed();
+      this.transitionTimer = null;
+    }.bind(this), closeDuration);
   };
 
   proto.handleEvent = function sd_handleEvent(evt) {
